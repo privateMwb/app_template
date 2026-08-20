@@ -1,0 +1,33 @@
+# ============================================================
+# .github/workflows/clang-format.yml
+# Checks that all first-party source files are clang-format
+# clean on every push and pull request.
+#
+# Scoped to backend/include and backend/src only — backend/
+# external/ is untouched vendored code, not this project's own,
+# and frontend/ is JS/TS/JSX, outside clang-format's domain (see
+# frontend.yml's own lint step for the equivalent there).
+# ============================================================
+
+name: Clang Format
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: sudo apt update && sudo apt install -y clang-format
+
+      - name: Check formatting
+        run: |
+          find backend/include backend/src \
+            \( -name "*.h" -o -name "*.hpp" -o -name "*.cpp" -o -name "*.tpp" \) \
+            -exec clang-format --dry-run --Werror {} +

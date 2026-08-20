@@ -1,0 +1,11 @@
+@import "tailwindcss";
+@import "boxicons/css/boxicons.min.css";
+
+/*
+ * Global styles beyond utility classes go here -- e.g. @theme
+ * customization (Tailwind v4's replacement for tailwind.config.js
+ * theme.extend), or the rare base-element override that isn't
+ * worth repeating as a utility class everywhere.
+ *
+ * See: https://tailwindcss.com/docs/theme
+ */

@@ -1,0 +1,86 @@
+# ============================================================
+# .clang-tidy
+#
+# Without this file, clang-tidy falls back to its full default
+# check set -- which includes several checks that tend to fight
+# common, deliberate C++ conventions rather than catch real bugs.
+# Disabled below, with the reasoning noted for each so a future
+# change is a conscious decision, not a silent re-enable:
+#
+#   readability-named-parameter
+#     Flags unnamed function parameters. Common and intentional
+#     for interface/handler signatures where a parameter exists
+#     for the call shape but isn't used in that particular
+#     implementation (e.g. framework callbacks). Enable this if
+#     your project's convention is to always name parameters.
+#
+#   readability-identifier-naming
+#     No single naming convention is enforced across this
+#     template. Enable and configure this once your project
+#     settles on one (e.g. PascalCase types, lower_snake_case
+#     functions) so it can actually be enforced consistently
+#     instead of fighting whatever's chosen.
+#
+#   performance-enum-size
+#     Backing-type micro-optimization for enums. Not worth
+#     adopting as a blanket rule this early; revisit if enum
+#     memory footprint ever actually matters for this project.
+#
+#   bugprone-easily-swappable-parameters
+#     Flags functions with 3+ adjacent same-typed parameters
+#     (e.g. multiple std::string args in a row). A real concern
+#     in principle, but fixing it means restructuring signatures
+#     (tag types, structs) -- a deliberate design change per call
+#     site, not something to silently fix via a lint pass.
+#
+#   readability-magic-numbers
+#     Fires on any bare numeric literal not routed through a
+#     named constant. Useful once real code exists to apply it
+#     to consistently; disabled here so it doesn't immediately
+#     flood template/example code with noise.
+#
+#   readability-identifier-length
+#     Fires on short identifiers like `i`, `db`, `id`. Many
+#     codebases use short names deliberately for tightly-scoped,
+#     obvious-context locals. Re-enable and tune the minimum
+#     length if your project prefers longer names everywhere.
+#
+#   misc-non-private-member-variables-in-classes
+#     Flags public fields on any class. Disabled because plain
+#     data structs (no invariants to protect) are a normal,
+#     intentional pattern -- this check can't distinguish those
+#     from classes that should be encapsulating state.
+#
+#   misc-include-cleaner
+#     Flags any symbol used without including its exact defining
+#     header. Disabled by default here because it conflicts with
+#     "umbrella header" designs, where a library deliberately
+#     exposes its public API through one main header rather than
+#     requiring consumers to include each originating header
+#     directly. Re-enable if this project doesn't use that
+#     pattern.
+#
+# Everything else uses clang-tidy's defaults. If a future warning
+# turns out to be more noise than a real conflict worth living
+# with, add it above with the same reasoning -- don't just
+# silence it without a note.
+# ============================================================
+
+Checks: >
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  bugprone-*,
+  misc-*,
+  performance-*,
+  readability-*,
+  -readability-named-parameter,
+  -readability-identifier-naming,
+  -performance-enum-size,
+  -bugprone-easily-swappable-parameters,
+  -readability-magic-numbers,
+  -readability-identifier-length,
+  -misc-non-private-member-variables-in-classes,
+  -misc-include-cleaner
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: '(backend/include|backend/src)/.*'

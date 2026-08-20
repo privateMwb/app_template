@@ -1,0 +1,155 @@
+# ============================================================
+# .github/workflows/sanitizers.yml
+# Boots app_backend under AddressSanitizer+
+# UndefinedBehaviorSanitizer, and separately under
+# ThreadSanitizer, to catch memory/UB and data-race issues.
+#
+# TODO: this is a boot-only smoke test out of the box, since
+# this template's backend/src/sample.cpp has no real endpoints
+# yet. Once the app has real request handlers -- especially
+# anything concurrency-sensitive (shared state behind a lock,
+# atomics, a check-then-act critical section) -- replace the
+# "run briefly" step below with real requests against those
+# endpoints, fired concurrently for the tsan job specifically.
+# ThreadSanitizer only reports what actually gets exercised, so
+# a boot-only run won't catch a data race that only occurs on a
+# real code path being hit.
+#
+# ASan+UBSan can share one binary; ThreadSanitizer cannot be
+# combined with ASan in the same build, hence two separate
+# configure/build passes below.
+# ============================================================
+
+name: Sanitizers
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  asan-ubsan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Fail fast and visibly rather than hang silently.
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang curl
+
+      - name: Configure
+        working-directory: backend
+        env:
+          CXX: clang++
+          CXXFLAGS: -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1
+          LDFLAGS: -fsanitize=address,undefined
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        working-directory: backend
+        run: cmake --build build
+
+      - name: Run briefly and check for sanitizer errors
+        working-directory: backend
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=0
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=0
+        run: |
+          mkdir -p data
+          ./build/app_backend > app.log 2>&1 &
+          APP_PID=$!
+
+          # TODO: replace this fixed sleep with polling a real
+          # readiness endpoint once one exists (e.g. curl a
+          # /health route in a retry loop), and add real requests
+          # here to actually exercise the app's code paths.
+          sleep 5
+
+          kill -TERM "$APP_PID" 2>/dev/null || true
+
+          # Bounded wait, not `wait "$APP_PID"` alone -- if the
+          # process is hung, SIGTERM may never be processed, and
+          # an unbounded wait would hang this job indefinitely.
+          for i in $(seq 1 10); do
+            if ! kill -0 "$APP_PID" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          kill -KILL "$APP_PID" 2>/dev/null || true
+          wait "$APP_PID" 2>/dev/null || true
+
+          cat app.log
+
+          if grep -qE "ERROR: (AddressSanitizer|UndefinedBehaviorSanitizer)" app.log; then
+            echo "Sanitizer reported an error -- see log above."
+            exit 1
+          fi
+
+  tsan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # Fail fast and visibly instead of silently
+                        # consuming CI hours if the app hangs (real
+                        # deadlock, or an unready process + a
+                        # timeout-less wait).
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang curl
+
+      - name: Configure
+        working-directory: backend
+        env:
+          CXX: clang++
+          CXXFLAGS: -fsanitize=thread -fno-omit-frame-pointer -g -O1
+          LDFLAGS: -fsanitize=thread
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+
+      - name: Build
+        working-directory: backend
+        run: cmake --build build
+
+      - name: Run briefly and check for data races
+        working-directory: backend
+        env:
+          TSAN_OPTIONS: halt_on_error=0
+        run: |
+          mkdir -p data
+          ./build/app_backend > app.log 2>&1 &
+          APP_PID=$!
+
+          # TODO: TSan instrumentation is slow to boot -- once a
+          # real readiness endpoint exists, poll it here instead
+          # of sleeping blind, then fire several requests
+          # concurrently against whatever code path actually
+          # holds a lock or touches shared/atomic state, so TSan
+          # has something real to observe.
+          sleep 10
+
+          kill -TERM "$APP_PID" 2>/dev/null || true
+
+          for i in $(seq 1 10); do
+            if ! kill -0 "$APP_PID" 2>/dev/null; then
+              break
+            fi
+            sleep 1
+          done
+          kill -KILL "$APP_PID" 2>/dev/null || true
+          wait "$APP_PID" 2>/dev/null || true
+
+          cat app.log
+
+          if grep -q "WARNING: ThreadSanitizer" app.log; then
+            echo "ThreadSanitizer reported a data race -- see log above."
+            exit 1
+          fi

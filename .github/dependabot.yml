@@ -1,0 +1,24 @@
+# ============================================================
+# .github/dependabot.yml
+#
+# - github-actions: keeps workflow action versions
+#   (actions/checkout@v4, etc.) current.
+# - npm: keeps frontend/package.json dependencies current.
+#
+# No package-ecosystem entry for backend C++ deps: those are
+# pinned as git submodule commits under backend/external/ (see
+# .gitmodules), not a manifest file Dependabot understands. Bump
+# those manually, or via each submodule's own release notes.
+# ============================================================
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"

@@ -1,0 +1,57 @@
+# ============================================================
+# .github/workflows/clang-tidy.yml
+# Static analysis on backend/include and backend/src.
+#
+# Requires the repo-root .clang-tidy to mean anything specific
+# to this project — without one, clang-tidy just runs its own
+# built-in defaults. Same dependency as clang-format.yml has on
+# .clang-format; both configs should exist before relying on
+# either check being meaningful (they already do in this
+# template — see the repo root).
+#
+# Uses compile_commands.json (CMAKE_EXPORT_COMPILE_COMMANDS) so
+# clang-tidy sees the real include paths/flags backend/'s build
+# actually uses, instead of guessing.
+# ============================================================
+
+name: Clang Tidy
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tidy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build clang clang-tidy
+
+      - name: Configure (generate compile_commands.json)
+        working-directory: backend
+        env:
+          CXX: clang++
+        run: cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Run clang-tidy
+        working-directory: backend
+        run: |
+          find include src -name "*.cpp" \
+            -print0 | xargs -0 clang-tidy -p build
+          # No --header-filter/--warnings-as-errors here: the repo-root
+          # .clang-tidy already sets HeaderFilterRegex (correctly scoped
+          # to backend/include and backend/src, so external/'s vendored
+          # headers are excluded) and WarningsAsErrors. A CLI flag would
+          # override those config values rather than complement them --
+          # a broad '(include|src)/.*\.h$' CLI filter would do exactly
+          # that, and would also match e.g.
+          # external/somelib/include/... too, since that path also
+          # contains the substring "include/".
