@@ -12,7 +12,7 @@
 #     different binary name -- just keep it in sync with
 #     BINARY_NAME in ../Dockerfile, since that's the name Docker
 #     copies out of the build and runs.
-#   - Replace src/sample.cpp / include/sample.h with real code,
+#   - Replace src/main.cpp / include/sample.h with real code,
 #     and update the sources list below to match.
 # ============================================================
 
@@ -65,7 +65,7 @@ set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 # sync with BINARY_NAME in ../Dockerfile.
 add_executable(
     app_backend
-    src/sample.cpp
+    src/main.cpp
 )
 
 target_include_directories(
