@@ -18,7 +18,7 @@
 -->
 
 <p align="center">
-  <img src="docs/assets/banner.svg" alt="<ProjectName>" width="100%">
+  <img src=".github/assets/banner.svg" alt="<ProjectName>" width="100%">
 </p>
 
 <p align="center">
@@ -58,7 +58,7 @@
 </p>
 
 <p align="center">
-  <img src="docs/assets/divider.svg" alt="" width="100%">
+  <img src=".github/assets/divider.svg" alt="" width="100%">
 </p>
 
 <!-- One or two sentences: what this is, and the two or three things
@@ -95,7 +95,7 @@
   it is>.
 - **<Another feature>** — <same pattern>.
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="requirements"></a>📋 Requirements
 
@@ -105,7 +105,7 @@
 - Node.js 20+ and npm
 - Docker, if building the backend image (optional for local dev)
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="getting-started"></a>🚀 Getting Started
 
@@ -135,7 +135,7 @@ npm run dev
 See [backend/README.md](backend/README.md) and
 [frontend/README.md](frontend/README.md) for details on either side.
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="project-structure"></a>🗂️ Project Structure
 
@@ -148,27 +148,24 @@ See [backend/README.md](backend/README.md) and
 │   ├── data/                         # runtime data; gitignored except .gitkeep
 │   ├── external/                     # vendored dependencies, as git submodules
 │   ├── include/
-│   │   └── sample.h
 │   ├── src/
-│   │   └── sample.cpp
 │   ├── CMakeLists.txt
 │   └── README.md
 │
 ├── frontend/
 │   ├── public/
-│   ├── src/
-│   │   ├── assets/                   # images imported/bundled by Vite
-│   │   ├── lib/
-│   │   │   ├── api.ts                # typed fetch wrapper
-│   │   │   └── utils.ts              # cn() class-merge helper
-│   │   ├── pages/
-│   │   │   └── Home.tsx
-│   │   ├── App.tsx
-│   │   ├── index.css                 # Tailwind + Boxicons entrypoint
-│   │   └── main.tsx
+│   ├── src/                          # components, pages, lib/ (api client, cn() helper)
 │   ├── .env.example
+│   ├── .gitignore
+│   ├── .prettierignore
+│   ├── .prettierrc.json
 │   ├── eslint.config.js
+│   ├── index.html
+│   ├── package-lock.json
 │   ├── package.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
 │   ├── vite.config.ts
 │   └── README.md
 │
@@ -178,16 +175,9 @@ See [backend/README.md](backend/README.md) and
 │   └── README.md
 │
 ├── .github/
+│   ├── assets/                       # banner, divider, back-to-top for README
 │   ├── releases/
-│   │   └── RELEASE_TEMPLATE.md
-│   ├── workflows/
-│   │   ├── build.yml
-│   │   ├── clang-format.yml
-│   │   ├── clang-tidy.yml
-│   │   ├── docs.yml
-│   │   ├── frontend.yml
-│   │   ├── release.yml
-│   │   └── sanitizers.yml
+│   ├── workflows/                    # build, lint, sanitizers, docs, release, CodeQL
 │   └── dependabot.yml
 │
 ├── .clang-format
@@ -201,7 +191,7 @@ See [backend/README.md](backend/README.md) and
 
 </details>
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="development"></a>🛠️ Development
 
@@ -222,7 +212,7 @@ ThreadSanitizer — see `.github/workflows/sanitizers.yml`, and its
 `TODO`s for wiring in real endpoint checks once the app has real
 handlers.
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="documentation"></a>📖 Documentation
 
@@ -231,7 +221,7 @@ Full API reference for the backend, generated with Doxygen from
 
 **https://<owner>.github.io/<repo>/**
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="deployment"></a>☁️ Deployment
 
@@ -255,7 +245,7 @@ No specific host is wired up in this template — pick per app based
 on what it needs (a persistent volume for `backend/data/`, a
 managed database instead, etc.).
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="contributing"></a>🤝 Contributing
 
@@ -267,7 +257,7 @@ Issues and pull requests are welcome. Before submitting a PR:
 - Make sure `docker build .` still succeeds if you touched the
   backend or `Dockerfile`
 
-<div align="right"><a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
+<div align="right"><a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a></div>
 
 ## <a id="changelog"></a>📝 Changelog
 
@@ -283,5 +273,5 @@ MIT — see [LICENSE](LICENSE) for details.
 </p>
 
 <p align="center">
-  <a href="#-table-of-contents"><img src="docs/assets/back-to-top.svg" alt="Back to top" height="28"></a>
+  <a href="#-table-of-contents"><img src=".github/assets/back-to-top.svg" alt="Back to top" height="28"></a>
 </p>
