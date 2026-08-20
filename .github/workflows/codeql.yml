@@ -1,0 +1,78 @@
+# ============================================================
+# .github/workflows/codeql.yml
+# Security-focused static analysis via CodeQL, separate from
+# clang-tidy (code quality) -- CodeQL's dataflow analysis catches
+# a different class of issue (injection, unsafe deserialization,
+# buffer overflow patterns, etc.) that a style/quality linter
+# isn't built to find.
+#
+# C++ is a compiled language, so CodeQL needs an actual build to
+# extract from -- "manual" build-mode below runs the same
+# backend/ configure+build steps as build.yml, just for GCC/
+# Debug specifically (one build is enough for extraction; this
+# isn't testing the build itself, build.yml already does that
+# across the full compiler/build-type matrix).
+#
+# JS/TypeScript is interpreted -- "none" build-mode means CodeQL
+# extracts straight from source, no build step needed.
+#
+# Runs on a weekly schedule in addition to push/PR, so findings
+# in code that hasn't changed recently still surface as CodeQL's
+# own query packs get updated over time.
+# ============================================================
+
+name: CodeQL
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1" # Every Monday
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+
+    permissions:
+      security-events: write
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: c-cpp
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+
+    steps:
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+
+      - name: Install backend build dependencies
+        if: matrix.language == 'c-cpp'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build g++
+
+      - name: Build backend (for CodeQL extraction)
+        if: matrix.language == 'c-cpp'
+        working-directory: backend
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
