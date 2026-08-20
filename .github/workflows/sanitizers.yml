@@ -32,7 +32,7 @@ jobs:
     timeout-minutes: 15 # Fail fast and visibly rather than hang silently.
     steps:
       - name: Checkout (with submodules)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
@@ -98,7 +98,7 @@ jobs:
                         # timeout-less wait).
     steps:
       - name: Checkout (with submodules)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           submodules: recursive
 
